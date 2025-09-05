@@ -1,0 +1,42 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: botpress-staging
+      cancel-in-progress: true
+    env:
+      STAGING_BOT_ID: ${{ secrets.STAGING_BOT_ID }}
+      BOTPRESS_ACCESS_TOKEN: ${{ secrets.BOTPRESS_ACCESS_TOKEN }}
+    steps:
+      - name: Checkout code
+        # v4 is latest stable; works with GitHub-hosted runners
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - name: Install Botpress CLI
+        run: npm install -g @botpress/cli
+
+      - name: Deploy to Botpress (Staging)
+        run: |
+          if [ -z "$STAGING_BOT_ID" ] || [ -z "$BOTPRESS_ACCESS_TOKEN" ]; then
+            echo "Missing STAGING_BOT_ID or BOTPRESS_ACCESS_TOKEN secrets"; exit 1;
+          fi
+          bp deploy \
+            --bot-id "$STAGING_BOT_ID" \
+            --token "$BOTPRESS_ACCESS_TOKEN" \
+            --create
