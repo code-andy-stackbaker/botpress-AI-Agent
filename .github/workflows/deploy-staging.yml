@@ -1,4 +1,3 @@
-# .github/workflows/deploy-staging.yml
 name: Deploy to Staging
 
 on:
@@ -17,8 +16,8 @@ jobs:
       cancel-in-progress: true
     env:
       STAGING_BOT_ID: ${{ secrets.STAGING_BOT_ID }}
-      BOTPRESS_ACCESS_TOKEN: ${{ secrets.BOTPRESS_ACCESS_TOKEN }}
-      WORKSPACE_ID: ${{ secrets.WORKSPACE_ID }} # <-- add this secret
+      WORKSPACE_ID: ${{ secrets.WORKSPACE_ID }}
+      BOTPRESS_PAT: ${{ secrets.BOTPRESS_PAT }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -27,23 +26,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "18"
-          cache: "npm"
 
       - name: Install Botpress CLI
         run: npm install -g @botpress/cli
 
       - name: Botpress login (non-interactive)
-        run: |
-          if [ -z "$BOTPRESS_ACCESS_TOKEN" ] || [ -z "$WORKSPACE_ID" ]; then
-            echo "Missing WORKSPACE_ID or BOTPRESS_ACCESS_TOKEN"; exit 1;
-          fi
-
-          bp login --workspace-id "$WORKSPACE_ID" --token "$BOTPRESS_ACCESS_TOKEN" \
-          || bp login --workspaceId "$WORKSPACE_ID" --token "$BOTPRESS_ACCESS_TOKEN"
+        run: bp login --workspaceId "$WORKSPACE_ID" --token "$BOTPRESS_PAT"
 
       - name: Deploy to Botpress (Staging)
-        run: |
-          if [ -z "$STAGING_BOT_ID" ]; then
-            echo "Missing STAGING_BOT_ID"; exit 1;
-          fi
-          bp deploy --bot-id "$STAGING_BOT_ID"
+        run: bp deploy --bot-id "$STAGING_BOT_ID"
