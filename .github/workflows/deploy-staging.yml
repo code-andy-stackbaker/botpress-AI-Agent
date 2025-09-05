@@ -19,7 +19,6 @@ jobs:
       BOTPRESS_ACCESS_TOKEN: ${{ secrets.BOTPRESS_ACCESS_TOKEN }}
     steps:
       - name: Checkout code
-        # v4 is latest stable; works with GitHub-hosted runners
         uses: actions/checkout@v4
 
       - name: Setup Node.js
@@ -38,5 +37,4 @@ jobs:
           fi
           bp deploy \
             --bot-id "$STAGING_BOT_ID" \
-            --token "$BOTPRESS_ACCESS_TOKEN" \
-            --create
+            --token "$BOTPRESS_ACCESS_TOKEN"
